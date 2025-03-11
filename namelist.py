@@ -7,16 +7,16 @@ Namelist file that serves as the configuration file for the TC-risk model.
 
 ########################## File System Parameters ###########################
 src_directory = os.path.dirname(os.path.abspath(__file__))
-base_directory = '%s/data/era5' % src_directory
-output_directory = '%s/data/era5' % src_directory
-exp_name = 'test'
+base_directory = '/share/lin/jlin/era5'
+output_directory = '/share/lin/ath87/downscaling'
+exp_name = 'tc_downscaling'
 # For now, we support either 'GCM' or 'ERA5'. Different file types and variable
 # names can be added by modifying the "input.py" file and adding the appropriate
 # variable key words in the structure var_keys.
+dataset_type = 'ERA5'
+exp_prefix = 'era5'
 # file_type is the file type of the input files, and
 # can be either 'netcdf' or 'grib'
-dataset_type = 'ERA5' #'GCM'
-exp_prefix = 'era5' #GFDL-CM4_ssp585_r1i1p1f1'
 file_type = 'grib'
 
 # Variable naming based on dataset_type.
@@ -28,29 +28,30 @@ file_type = 'grib'
 # 'v' is meridional wind (daily)
 var_keys = {'ERA5': {'sst': 'sst', 'mslp': 'sp', 'temp': 't',
                      'sp_hum': 'q', 'u': 'u', 'v': 'v',
-                     'lvl': 'isobaricInhPa', 'lon': 'longitude', 'lat': 'latitude'},
-            'GCM': {'sst': 'tos', 'mslp': 'psl', 'temp': 'ta',
+                     'lon': 'longitude', 'lat': 'latitude',
+                     'lvl': 'isobaricInhPa'},
+            'GCM': {'sst': 'tos', 'mslp': 'ps', 'temp': 'ta',
                     'sp_hum': 'hus', 'u': 'ua', 'v': 'va',
                     'lvl': 'plev', 'lon': 'lon', 'lat': 'lat'}}
 
 ########################### Parallelism Parameters ##########################
-n_procs = 16              # number of processes to use in dask
+n_procs = 2                          # number of processes to use in dask
 
 ############################ TC Risk Parameters #############################
 """
 These parameters configure the dates for the TC-risk model.
 """
-start_year = 2016                     # year to start downscaling
+start_year = 1979                     # year to start downscaling
 start_month = 1                       # month of start_year to start downscaling
-end_year = 2021                       # year to stop downscaling
+end_year = 2023                       # year to stop downscaling
 end_month = 12                        # month of end_year to stop downscaling
 
 """
 These parameters configure the output.
 """
 output_interval_s = 3600              # output interval of tracks, seconds (does not change time integration)
-total_track_time_days = 15            # total time to integrate tracks, days
-tracks_per_year = 20                  # total number of tracks to simulate per year
+total_track_time_days = 20            # total time to integrate tracks, days
+tracks_per_year = 90                  # total number of tracks to simulate per year
 
 """
 These parameters configure thermodynamics and thermodynamic constants.
@@ -77,8 +78,8 @@ y_alpha = [0.17, 0.83]                # value of steering coefficient at 0 knots
 m_alpha = [0.0025, -0.0025]           # change of each coefficient per unit storm intensity, 1 / kts
 alpha_max = [0.41, 0.78]              # maximum value of each steering coefficient (coupled track only)
 alpha_min = [0.22, 0.59]              # minimum value of each steering coefficient (coupled track only)
-u_beta = -1.0                         # zonal beta drift, m/s
-v_beta = 2.5                          # meridional beta drift, m/s
+u_beta = -0.5                         # zonal beta drift, m/s
+v_beta = 2.75                          # meridional beta drift, m/s
 T_days = 20                           # period of the fourier series, days
 seed_v_init_ms = 5                    # initial seed v intensity, m/s
 seed_v_2d_threshold_ms = 6.5          # seed v threshold after 2 days, m/s
@@ -87,14 +88,17 @@ seed_vmax_threshold_ms = 18           # seed vmax threshold over entire lifetime
 # Atmospheric boundary layer depth (FAST), m
 atm_bl_depth = {'NA': 1400.0, 'EP': 1400.0, 'WP': 1800.0, 'AU': 1800.0,
                 'SI': 1600.0, 'SP': 2000.0, 'NI': 1500.0}
-log_chi_fac = 0.5                     # addition to chi in log space
-chi_fac = 1.3                         # addition to chi
-lat_vort_fac = 2                      # sets where vorticity threshold decays toward equator
+log_chi_fac = 0.0                    # addition to chi in log space
+chi_fac = 1.55                       # addition to chi
+R_shape = 0.15                        # shape factor
+U_rhines = 30                         # Rhines scale wind speed
 lat_vort_power = {'NA': 6, 'EP': 6,   # power decay towards the equator
                   'WP': 3.5, 'AU': 6,
                   'SI': 3, 'SP': 7, 'NI': 2.5}
+lat_vort_fac = 2
+lat_thresh = 11.5
 # Initial m based on large-scale relative humidity
-f_mInit = lambda rh: 0.20 / (1 + np.exp(-(rh - 0.55) * 10)) + 0.125
+f_mInit = lambda rh: 0.10 / (1 + np.exp(-(rh - 0.55) * 10)) + 0.125
 
 """
 Basins for which the model is enabled.
