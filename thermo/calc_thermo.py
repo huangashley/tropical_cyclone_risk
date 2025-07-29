@@ -11,6 +11,7 @@ import namelist
 import numpy as np
 import xarray as xr
 
+from dask.distributed import LocalCluster, Client
 from util import input, mat
 from thermo import thermo
 
@@ -92,11 +93,16 @@ def gen_thermo():
 
     n_chunks = namelist.n_procs
     chunks = np.array_split(ds_times, np.minimum(n_chunks, np.floor(len(ds_times) / 2)))
+
+    cl_args = {'n_workers': namelist.n_procs,
+               'processes': True,
+               'threads_per_worker': 1}
     lazy_results = []
-    for i in range(len(chunks)):
-        lazy_result = dask.delayed(compute_thermo)(chunks[i][0], chunks[i][-1])
-        lazy_results.append(lazy_result)
-    out = dask.compute(*lazy_results, scheduler = 'processes', num_workers = n_chunks)
+    with LocalCluster(**cl_args) as cluster, Client(cluster) as client:
+        for i in range(n_chunks):
+            lazy_result = dask.delayed(compute_thermo)(chunks[i][0], chunks[i][-1])
+            lazy_results.append(lazy_result)
+        out = dask.compute(*lazy_results, scheduler = 'processes', num_workers = n_chunks)
 
     # Clean up and process output.
     # Ensure monthly timestamps have middle-of-the-month days.

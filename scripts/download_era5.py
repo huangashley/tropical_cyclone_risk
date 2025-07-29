@@ -23,13 +23,9 @@ os.makedirs(fn_base, exist_ok = True)
 def request_file(fn, req_type, req):
     c = cdsapi.Client()
     if not os.path.isfile(fn):
-        try:
-            print('Requesting %s...' % fn)
-            c.retrieve(req_type, req, fn).download()
-            print('Downloaded %s...' % fn)
-        except:
-            print("Error downloading the data...")
-            pass
+        print('Requesting %s...' % fn)
+        c.retrieve(req_type, req, fn)
+        print('Downloaded %s...' % fn)
     else:
         print('Found file %s...' % fn)
 

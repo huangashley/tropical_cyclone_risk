@@ -48,7 +48,7 @@ def read_drag(basin):
     # Converts from a 10m altitude drag coefficient to a
     # drag coefficient more appropriate to the gradient wind, and
     # normalizes with respect to over-ocean Cd.
-    Cd_gradient = Cd / (1 + 50.0 * Cd)
+    Cd_gradient = Cd / (1 + 250.0 * Cd)
     Cd_norm = Cd_gradient / np.min(Cd_gradient)
     Cd = namelist.Cd * Cd_norm
 
