@@ -142,14 +142,14 @@ def run_tracks(year, n_tracks, b):
             # Random genesis location for the seed (weighted by area).
             # Ensure that it is located within the basin and over ocean.
             # Genesis is [3, 45] latitude for each basin.
-            lat_min = 21.0703125 if np.sign(b_bounds[1]) >= 0 else -21.64160156
-            lat_max = 21.64160156 if np.sign(b_bounds[3]) >= 0 else -21.0703125
+            lat_min = 3 if np.sign(b_bounds[1]) >= 0 else -45
+            lat_max = 45 if np.sign(b_bounds[3]) >= 0 else -3
             y_min = np.sin(np.pi / 180 * lat_min)
             y_max = np.sin(np.pi / 180 * lat_max)
-            gen_lon = np.random.uniform(273.5234375, 273.98339844, 1)[0] # np.random.uniform(b_bounds[0], b_bounds[2], 1)[0]
+            gen_lon = np.random.uniform(b_bounds[0], b_bounds[2], 1)[0]
             gen_lat = np.arcsin(np.random.uniform(y_min, y_max, 1)[0]) * 180 / np.pi
             while f_b.ev(gen_lon, gen_lat) < 1e-2:
-                gen_lon = np.random.uniform(273.5234375, 273.98339844, 1)[0] # np.random.uniform(b_bounds[0], b_bounds[2], 1)[0]
+                gen_lon = np.random.uniform(b_bounds[0], b_bounds[2], 1)[0]
                 gen_lat = np.random.uniform(b_bounds[1], b_bounds[3], 1)[0]
 
             # Randomly seed the month.

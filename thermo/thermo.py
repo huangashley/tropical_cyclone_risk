@@ -103,6 +103,56 @@ def sat_deficit(sst,ps,T,pm,rv):
     chi = (sps-sp)/(spss-sps);
     return chi
 
+""" Chi denominator: spss - sps (surface minus mid-level saturation entropy).
+
+This quantity drives both the denominator of chi and (via the CAPE difference)
+potential intensity.  Exposed as a standalone function so gen_thermo can compute
+its full-period climatology in a lightweight first pass.
+"""
+def chi_denominator(sst, ps, T, pm, rv):
+    select_thermo = namelist.select_thermo
+    sps  = s_sat(T,   pm, rv, select_thermo)   # mid-level saturation entropy
+    spss = s_sat(sst, ps, rv, select_thermo)   # surface saturation entropy
+    return spss - sps
+
+""" Saturation deficit using a fixed (climatological) mid-level relative humidity.
+
+rv_climo = rh_climo * rs(T, pm) replaces the actual rv so the entropy deficit
+numerator (sps - sp) reflects climatological moisture.  The denominator still
+uses the local (transient) thermodynamic state unless chi_denom_climo is also
+provided (climo-vmax experiment).
+
+Arguments
+---------
+sst, ps     : surface temperature [K] and pressure [Pa]
+T, pm       : mid-level temperature [K] and pressure [Pa]
+rv          : actual mid-level mixing ratio (used only when rh_climo is None)
+rh_climo    : (lat,lon) climatological mid-level RH; if given, replaces rv in
+              the numerator via rv_climo = rh_climo * rs(T, pm)
+chi_denom_climo : (lat,lon) pre-computed climatological chi denominator
+              (spss - sps); if given, replaces the transient denominator
+"""
+def sat_deficit_climo(sst, ps, T, pm, rv, rh_climo=None, chi_denom_climo=None):
+    select_thermo = namelist.select_thermo
+
+    # Effective mixing ratio for the entropy numerator
+    if rh_climo is not None:
+        _, rs = sat_thermo(T, pm)
+        rv_eff = rh_climo * rs   # rv_climo ≈ rh_climo * rs (error < 1% for tropics)
+    else:
+        rv_eff = rv
+
+    sp  = s_unsat(T, pm, rv_eff, rv_eff, select_thermo)
+    sps = s_sat(T,   pm, rv_eff,         select_thermo)
+
+    if chi_denom_climo is not None:
+        denom = chi_denom_climo
+    else:
+        spss  = s_sat(sst, ps, rv_eff, select_thermo)
+        denom = spss - sps
+
+    return (sps - sp) / denom
+
 """LCL computations Based on "Exact expression for the lifting condensation level", Romps 2017 """
 def get_LCL(p,T,r,rh):
     # Internal parameters

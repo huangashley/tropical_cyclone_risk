@@ -74,7 +74,7 @@ Every modeling center, however, has different naming conventions for variables. 
 | lon          | longitude |
 | lat          | latitude |
 
-For instance, the specific humidity is named 'q' in the ERA5 datasets, so we set the key-value pair 'sp_hum' and 'q' in the 'ERA5' (which is specified by <code>namelist.dataset_type</code>) entry in <code>namelist.var_keys</code>.
+For instance, the specific humidity is named 'q' in the ERA5 datasets, so we set the key-value pair 'sp_hum' and 'q' in the 'ERA5' (which is specified by <code>namelist.dataset_type</code>) entry in <code>namelist.var_keys</code>. Temperature and specific humidity should be given with their full vertical profiles (in order to calculate potential intensity), while 'u' and 'v' only need to be provided on 250- and 850-hPa.
 
 Note, when using CMIP6 model data, some GCMs use non-rectangular horizontal coordinates. The interpolation code expects rectangular grids, so you will need to regrid the NetCDF files into rectanguular coordinate. The _cdo_ library is convenient for this. In addition, some vertical grids are output in sigma coordinates. You will need the vertical grid in pressure coordinates.
 

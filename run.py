@@ -11,7 +11,7 @@ if __name__ == '__main__':
     print('Saving model output to %s' % f_base)
     shutil.copyfile('./namelist.py', '%s/namelist.py' % f_base)
 
-    # generate_land_masks.generate_land_masks()
+    generate_land_masks.generate_land_masks()
     compute.compute_downscaling_inputs()
 
     print('Running tracks for basin %s...' % sys.argv[1])
